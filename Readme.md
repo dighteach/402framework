@@ -1,3 +1,3 @@
 ### Readme - 402framework
 
-Source code for the 402framework for DIGH402.
+Test source code for the 402framework for DIGH402.
