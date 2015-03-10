@@ -16,6 +16,8 @@ class Router {
 	private static $controller;
 	//action
 	private static $format;
+	//admin option selected
+	private static $admin;
 	//parameters
 	private static $params = array();
 					
@@ -55,6 +57,13 @@ function __construct () {
  	return self::$format;
  }
  
+ /**
+  * return the required admin option - if included in the route URI eg: edit, update...
+  */
+  function get_admin() {
+  	return self::$admin;
+  }
+ 
 /**
  * return any required parameters eg: id
  */
@@ -85,6 +94,12 @@ private function init() {
 	if (!empty($route_chunks[1])) {
 	$format = $route_chunks[1];
 	self::$format = $format;
+	}
+	
+	//define if admin option has been requested
+	if (!empty($route_chunks[2])) {
+	$admin = $route_chunks[2];
+	self::$admin = $admin;
 	}
 	
 	//define parameters - get full url etc and extract all strings after &..

@@ -6,6 +6,7 @@
 //framework general constants
 define("FRAME_EXTENSION", ".php");
 define("CONTROLLER_CLASS_NAME", "Controller");
+define("VIEWER_CLASS_NAME", "Viewer");
 
 //default design and layout constants
 define("HTML_HEAD", "head");
@@ -34,5 +35,9 @@ define("JQUERY_JS", "jquery.js");
 //template css and js files per user theme
 define("THEME_CSS", "theme.css");
 define("THEME_JS", "theme.js");
+
+//DB constants
+define("DB_PLUGINS", "plugins");
+define("DB_PLUGINS_LOOKUP", "plugins_lookup");
 
 ?>

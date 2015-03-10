@@ -16,6 +16,8 @@ define("BASE_NAME", basename($base_dir));
 define("CONFIG_DIR", "config/");
 define("DESIGN_DIR", "design/");
 define("FRAMEWORK_DIR", "frame/");
+define("MEDIA_DIR", "media/");
+define("PLUGINS_DIR", "plugins/");
 define("SYSTEM_DIR", "system/");
 
 //set framework system folders
@@ -28,6 +30,13 @@ define("CSS_DIR", "design/css/");
 define("DESIGN_IMAGES_DIR", "design/images/");
 define("THEMES_DIR", "design/themes/");
 define("THEME_DEFAULT", "design/themes/default/");
+
+//set framework media folders
+define("MEDIA_IMAGES_DIR", "media/images/");
+define("MEDIA_TEXTS_DIR", "media/texts/");
+
+//set framework plugins folders
+define("PLUGINS_ADMIN_DIR", "plugins/admin/");
 
 //set framework MVC folders
 define("MODEL_DIR", "frame/model/");

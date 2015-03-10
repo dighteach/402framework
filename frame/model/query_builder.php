@@ -23,6 +23,14 @@ class BuildQuery {
 	$db_query = DB::get_row('SELECT '.$column.' FROM '.$table.' WHERE '.$where.'=?', $field);
 	return $db_query;
 	}
+	
+	/**
+	 * return all possible results for a DB query for specified tables and fields
+	 */
+	protected function all_field_query($tables, $columns, $where, $fields) {
+	$db_query = DB::get_all('SELECT '.$columns.' FROM '.$tables.' WHERE '.$where, $fields);
+	return $db_query;
+	}
 
 }
 

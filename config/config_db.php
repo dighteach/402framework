@@ -7,8 +7,8 @@ $db=array(
 // development database
 'dev'=>array(
 'hostname'=>'localhost',
-'username'=>'user',
-'password'=>'pass',
+'username'=>'dbuser',
+'password'=>'dbpassword',
 'database'=>'db'
 ),
 //production database

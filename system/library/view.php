@@ -16,6 +16,9 @@ class View extends BuildHTML {
 	private static $div = "div";
 	private static $span = "span";
 	private static $img = "img";
+	private static $css_type = "text/css";
+	private static $css_media = "screen";
+	private static $js_type = "text/javascript";
 	
 	//setter method for theme
 	function set_theme($value) {
@@ -60,17 +63,52 @@ class View extends BuildHTML {
 	}
 	}
 	
+	//draw required options etc for specified plugins
+	function draw_plugins($plugins) {
+	if (!empty($plugins)) {
+	$plugins_attributes = array("id"=>"plugins","class"=>"plugin_options");
+	$plugins_start = BuildHTML::start_element(self::$div, $plugins_attributes);
+	$plugins_end = BuildHTML::end_element(self::$div);
+	echo $plugins_start;
+	//loop through plugins array
+	foreach($plugins as $key=>$val) {
+	$plugin_name = $val['plugin_name'];
+	$plugin_desc = $val['plugin_desc'];
+	$plugin_dir = $val['plugin_directory'];
+	$plugin_attributes = array("id"=>$plugin_name,"class"=>"plugin_link","title"=>$plugin_desc);
+	$plugin_start = BuildHTML::start_element(self::$span, $plugin_attributes);
+	$plugin_end = BuildHTML::end_element(self::$span);
+	//iterate over specified plugin directory and return all css and js files
+	$plugin_dir = PLUGINS_DIR.$plugin_dir.'/';
+	$files = Functions::dir_iterate(BASE_DIR.$plugin_dir);
+	//iterate over $files array
+	if (!empty($files)) {
+	foreach($files as $key=>$val) {
+	$fileparts = pathinfo($val);
+	$fileext = $fileparts['extension'];
+	//check for js files
+	if ($fileext == 'js') {
+	//draw js file
+	self::draw_js($plugin_dir, $val, self::$js_type);
+	}
+	}
+	}
+	echo $plugin_start;
+	echo str_replace('_', ' ', $plugin_name);
+	echo $plugin_end;
+	}
+	echo $plugins_end;
+	}
+	}
+	
 	//draw css & js for user selected theme 
 	function draw_theme() {
 		//add basic user specified theme css
 		$css_file = THEME_CSS;
-		$css_type = "text/css";
-		$css_media = "screen";
-		self::draw_css(self::$theme_dir, $css_file, $css_type, $css_media);
+		self::draw_css(self::$theme_dir, $css_file, self::$css_type, self::$css_media);
 		//add basic user specified theme js
 		$js_file = THEME_JS;
-		$js_type = "text/javascript";
-		self::draw_js(self::$theme_dir, $js_file, $js_type);
+		self::draw_js(self::$theme_dir, $js_file, self::$js_type);
 	}
 	
 	//draw the HTML head element and associated elements
@@ -102,16 +140,13 @@ class View extends BuildHTML {
 		//add default css to html head
 		if (is_array($css)) {
 		foreach ($css as $val) {
-		$type = "text/css";
-		$media = "screen";
-		self::draw_css(CSS_DIR, $val, $type, $media);
+		self::draw_css(CSS_DIR, $val, self::$css_type, self::$css_media);
 		}
 		}
 		//add default js to html head
 		if (is_array($js)) {
 		foreach ($js as $val) {
-		$type = "text/javascript";
-		self::draw_js(JAVASCRIPT_DIR, $val, $type);
+		self::draw_js(JAVASCRIPT_DIR, $val, self::$js_type);
 		}
 		}
 		//add user specified theme - simple css and js
@@ -145,12 +180,13 @@ class View extends BuildHTML {
 	}
 	
 	//draw html elements for defined middle of framework template - centre, main, and sidebar
-	function draw_middle($content, $content_meta) {
+	function draw_middle($content, $content_meta, $plugins) {
 		$attributes = array("id"=>HTML_CENTRE,"class"=>HTML_CENTRE_CLASS);
 		$centre_start = BuildHTML::start_element(self::$div, $attributes);
 		$centre_end = BuildHTML::end_element(self::$div);
 		echo $centre_start;
 		self::draw_sidebar($content_meta);
+		self::draw_plugins($plugins);
 		self::draw_main($content);
 		echo $centre_end;
 		

@@ -26,7 +26,28 @@ function array_implode($joint, $separator, $array) {
  	//return attribute string
  	return implode( $separator, $string );
 	}
-
+	
+/**
+ * iterate over specified directory and return available files
+ */
+function dir_iterate($dir) {
+	if (!empty($dir)) {
+	//array for files in specified directory
+	$files = array();
+	//create a handler for the directory
+    $handler = opendir($dir);
+	//open directory and iterate over the files
+    while ($file = readdir($handler)) {
+    //if file isn't this directory or its parent, add to $files array
+      if ($file != "." && $file != "..") {
+        $files[] = $file;
+      }
+    }
+    closedir($handler);
+    //return the $files array
+    return $files;
+	}
 }
 
+}
 ?>

@@ -82,7 +82,30 @@ static function get_row($query=null,$field=array()){
 	return self::query($query,$field)->fetch(self::$fetch_mode );
 }
 
+/**
+ * get all returned results for specified query and fields
+ */
+static function get_all( $query = null, $field=array(), $key = null, $value = null ){
+			$rows = array();
+			if( $result = self::query($query,$field)->fetchALL(self::$fetch_mode) ){
+				if( !$key )
+						return $result;
+				elseif( !$value )
+						foreach( $result as $row )
+								$rows[ $row[$key] ] = $row;
+				else
+						foreach( $result as $row )
+								$rows[ $row[$key] ] = $row[$value];
+			}
+			return $rows;
+		}
+
+/**
+ * close database connection
+ */
+static function disconnect( ){
+	unset( self::$link );
+}
 
 }
- 
 ?>
