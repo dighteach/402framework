@@ -37,33 +37,39 @@ function init_db($name = null){
 		db::init($name);
 }
 
-function auto_load_controller () {
+function auto_load_controller() {
 	require_once LIBRARY_DIR."router.php";
 	
 	$router = new Router;
 	$controller = $router->get_controller();
 	$controller_dir = $router->get_controller_dir();
-	$admin = $router->get_admin();
 	$format = $router->get_format();
+	$group = $router->get_group();
 	$params = $router->get_params();
 	
-	$this->load_controller($controller, $controller_dir, $format, $params, $admin);
+	$this->load_controller($controller, $controller_dir, $format, $group, $params);
 	
 	}
 
 /**
  * load content selected by URI, and save output to default content area
  */
-function load_controller ($controller = null, $controller_dir = null, $format = null, $params = null, $admin = null) {
+function load_controller($controller = null, $controller_dir = null, $format = null, $group = null, $params = null) {
  
 	//determine required controller and load class
 	if ($controller != null) {
 	$controller_file = $controller_dir.FRAME_EXTENSION;
+	//require taxonomy controller class
+	$taxonomy_file = CONTROLLER_DIR.'taxonomy'.FRAME_EXTENSION;
 	//load required controller
 	require_once $controller_file;
+	//load required taxonomy controller
+	require_once $taxonomy_file;
  
 	//define class name for required controller
 	$controller_class = ucfirst($controller).CONTROLLER_CLASS_NAME;
+	//define class name for taxonomy controller
+	$taxonomy_class = ucfirst('taxonomy').CONTROLLER_CLASS_NAME;
  
 	//check controller class exists and instantiate object
 	if (class_exists($controller_class)) {
@@ -73,9 +79,88 @@ function load_controller ($controller = null, $controller_dir = null, $format = 
 	//trigger debug error - for testing at the moment...
 	return trigger_error("Debug: Controller Class not found - <b>".$controller."</b>");
 	}
-  
-	//check content format and params for controller
-	if ($format != null && $params != null && $controller !=null) {
+	
+	//check taxonomy controller class exists and instantiate object
+	if (class_exists($taxonomy_class)) {
+	$taxonomy_object = new $taxonomy_class();
+	}
+	else {
+	//trigger debug error - for testing at the moment...
+	return trigger_error("Debug: Taxonomy Class not found</b>");
+	}
+  	
+  	//check content format, group, and params for controller - group content returned eg: image gallery
+  	if ($controller !=null && $format != null && $group != null && $params != null) {
+  	//get content for specified route
+	$content = $controller_object->get_content_group($controller, $format, $group, $params);
+	//get taxonomy title and description for metadata
+	$taxonomy_meta = $taxonomy_object->get_taxonomy_row($params);
+	$taxonomy_title = $taxonomy_meta['taxa_name'];
+	$taxonomy_desc = $taxonomy_meta['taxa_description'];
+	//add taxonomy title and description meta to content meta array
+	self::$content_meta['title'] = $taxonomy_title;
+	self::$content_meta['description'] = $taxonomy_desc;
+	
+	//build and draw view for framework with theme (if applicable)
+	if (!empty($content)) { 
+	//get chosen theme
+	View::selected_theme();
+	
+	//get default view for user select route - eg: content/image/gallery using $group
+	$group_view = VIEW_DIR.$group.FRAME_EXTENSION;
+	//load required view
+	require_once $group_view;
+	
+	//define class name for required group viewer
+	$group_class = ucfirst($group).VIEWER_CLASS_NAME;
+
+	//check group class exists and instantiate object
+	if (class_exists($group_class)) {
+	$group_object = new $group_class();
+	//group attributes array for use with group content html output
+	$group_attributes = array("id"=>$params["id"],"class"=>$group);
+	//taxonomy attributes array eg: title, desc
+	$taxonomy_attributes = array("title"=>$taxonomy_title,"desc"=>$taxonomy_desc);
+	//get formatted content with required viewer plugin (image/text etc)
+	$group_content = $group_object->get_group_content($content, $group_attributes, $taxonomy_attributes);
+	}
+	else {
+	//trigger debug error - for testing at the moment...
+	return trigger_error("Debug: Viewer Class not found - <b>".$group."</b>");
+	}
+	
+	//check available plugins for format
+ 	$plugin_controller = CONTROLLER_DIR.'plugin'.FRAME_EXTENSION;
+ 	//load required plugin file
+ 	require_once $plugin_controller;
+ 	
+ 	//define controller plugin class
+ 	$plugin_class = 'Plugin'.CONTROLLER_CLASS_NAME;
+ 	
+ 	//check plugin class and instantiate object
+ 	if (class_exists($plugin_class)) {
+	$plugin_object = new $plugin_class();
+	$plugin_check = $plugin_object->get_group_plugins($group);
+	self::load_plugins($plugin_check);
+	}
+	else {
+	//trigger debug error - for testing at the moment...
+	return trigger_error("Debug: Plugin Class not found - <b>".$controller.', '.$format."</b>");
+	}
+	//draw theme for plugin, metadata, and content
+	self::draw_theme($group_content, self::$content_meta, self::$plugins);
+	}
+	else {
+	//get chosen theme
+	View::selected_theme();
+	$content = 'No content found.';
+	self::$content_meta = null;
+	self::$plugins = null;
+	self::draw_theme($content, self::$content_meta, self::$plugins);
+	}
+  	}
+	//check content format and params for controller - single content returned eg: image, text...
+	else if ($controller !=null && $format != null && $params != null) {
 	//get content for specified route
 	$content = $controller_object->get_content_field($controller, $format, $params);
 	//get content title for specified route
@@ -92,7 +177,7 @@ function load_controller ($controller = null, $controller_dir = null, $format = 
 	//build and draw view for framework with selected plugin and theme (if applicable)
 	if (!empty($content)) { 
 	//get meta for content
-	self::load_meta($controller, $params);
+	self::load_meta($controller, $format, $params);
 	//get chosen theme
 	View::selected_theme();
 	
@@ -110,13 +195,13 @@ function load_controller ($controller = null, $controller_dir = null, $format = 
 	//viewer attributes array for use with viewer content html output
 	$viewer_attributes = array("id"=>$params["id"],"class"=>$format);
 	//format attributes array for the $format itself - eg: title, desc
-	$format_attributes = array("title"=>$content_title,"desc"=>$content_desc);
+	$format_attributes = array("title"=>$content_title.' - '.$content_desc,"desc"=>$content_desc);
 	//get formatted content with required viewer plugin (image/text etc)
 	$viewer_content = $viewer_object->get_viewer_content($content, $viewer_attributes, $format_attributes);
 	}
 	else {
 	//trigger debug error - for testing at the moment...
-	return trigger_error("Debug: Controller Class not found - <b>".$controller."</b>");
+	return trigger_error("Debug: Viewer Class not found - <b>".$format."</b>");
 	}
  	
  	//check available plugins for format
@@ -135,9 +220,8 @@ function load_controller ($controller = null, $controller_dir = null, $format = 
 	}
 	else {
 	//trigger debug error - for testing at the moment...
-	return trigger_error("Debug: Controller Class not found - <b>".$controller."</b>");
+	return trigger_error("Debug: Plugin Class not found - <b>".$controller.', '.$format."</b>");
 	}
- 	
 	//draw theme for plugin, metadata, and content
 	self::draw_theme($viewer_content, self::$content_meta, self::$plugins);
 	}
@@ -163,7 +247,7 @@ function load_controller ($controller = null, $controller_dir = null, $format = 
 
 }
 
-function load_meta($controller, $params) {
+function load_meta($controller, $format, $params) {
 	$metadata_controller_file = CONTROLLER_DIR.'metadata'.FRAME_EXTENSION;
 	//load the metadata class
 	require_once $metadata_controller_file;
@@ -177,10 +261,10 @@ function load_meta($controller, $params) {
  	}
  	else {
  	//trigger debug error - for testing at the moment...
- 	return trigger_error("Debug: Controller Class not found - <b>".$controller."</b>");
+ 	return trigger_error("Debug: Metadata Class not found");
  	}
  	
- 	$metadata = $meta_object->get_meta_row($controller, $params);
+ 	$metadata = $meta_object->get_meta_row($controller, $format, $params);
  	if (!empty($metadata)) {
  	self::$content_meta = array_merge(self::$content_meta, $metadata);
  	}
@@ -211,7 +295,7 @@ function load_plugins($plugin_check) {
 	}
 	else {
 	//trigger debug error - for testing at the moment...
-	return trigger_error("Debug: Controller Class not found - <b>".$controller."</b>");
+	return trigger_error("Debug: Plugin Class not found - <b>".$controller.', '.$format."</b>");
 	}
 }
 
@@ -239,8 +323,8 @@ function init_theme($theme) {
  */
 function draw_theme($content, $content_meta, $plugins) {
 	//set required default css and js files for framework
-	$css = array(FRAME_CSS, GRID_CSS);
-	$js = array(JQUERY_JS, FRAME_JS);
+	$css = array(FRAME_CSS, GRID_CSS, JQUERY_UI_CSS);
+	$js = array(JQUERY_JS, JQUERY_UI_JS, FRAME_JS);
 	//draw the template and theme
 	View::draw_head($css, $js);
 	View::draw_top();

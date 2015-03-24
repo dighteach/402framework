@@ -95,6 +95,35 @@ ul li {
 list-style: square;
 }
 
+/*generic table styles*/
+table {
+margin: 20px 0 20px 5px;
+width: 95%;
+}
+
+thead {
+background-color: #f2f2f2;
+padding: 5px;
+}
+
+th {
+cursor: pointer;
+color: #096eb6;
+font-weight: normal;
+border: 1px solid #dddddd;
+padding: 12px;
+}
+
+td {
+border: 1px solid #dedede;
+padding: 5px;
+font-size: 11px;
+}
+
+td img {
+width: 70%;
+}
+
 /*header within main container*/
 div.header {
 height: 90px;
@@ -183,4 +212,43 @@ span.plugin_link {
 padding: 5px;
 color: #096eb6;
 cursor: pointer;
+}
+
+/*gallery viewer options*/
+div.thumb_contain a {
+display: block;
+text-indent: 10px;
+}
+
+div.thumb_contain img {
+width: 150px;
+height: 150px;
+padding: 10px;
+cursor: pointer;
+}
+
+/*book viewer options*/
+
+
+/*group pager options*/
+#paging {
+padding-top: 30px;
+}
+
+ul#paging li {
+display: inline;
+padding: 5px;
+border: 1px solid #dedede;
+color: #096eb6;
+text-decoration:none;
+cursor: pointer;
+}
+
+ul#paging li:hover {
+background-color: #eeeeee;
+}
+
+ul#paging li.current {
+background-color: #096eb6;
+color: #ffffff;
 }

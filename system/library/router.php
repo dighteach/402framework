@@ -14,10 +14,10 @@ class Router {
 	private static $controller_dir;
 	//controller
 	private static $controller;
-	//action
+	//format
 	private static $format;
-	//admin option selected
-	private static $admin;
+	//group - includes gallery, work, admin etc
+	private static $group;
 	//parameters
 	private static $params = array();
 					
@@ -58,11 +58,11 @@ function __construct () {
  }
  
  /**
-  * return the required admin option - if included in the route URI eg: edit, update...
-  */
-  function get_admin() {
-  	return self::$admin;
-  }
+ * return the required format
+ */
+ function get_group() {
+ 	return self::$group;
+ }
  
 /**
  * return any required parameters eg: id
@@ -96,10 +96,10 @@ private function init() {
 	self::$format = $format;
 	}
 	
-	//define if admin option has been requested
+	//define if group has been requested
 	if (!empty($route_chunks[2])) {
-	$admin = $route_chunks[2];
-	self::$admin = $admin;
+	$group = $route_chunks[2];
+	self::$group = $group;
 	}
 	
 	//define parameters - get full url etc and extract all strings after &..

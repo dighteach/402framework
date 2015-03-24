@@ -186,7 +186,9 @@ class View extends BuildHTML {
 		$centre_end = BuildHTML::end_element(self::$div);
 		echo $centre_start;
 		self::draw_sidebar($content_meta);
+		if ($plugins != null) {
 		self::draw_plugins($plugins);
+		}
 		self::draw_main($content);
 		echo $centre_end;
 		
@@ -199,7 +201,6 @@ class View extends BuildHTML {
 		$main_start = BuildHTML::start_element(self::$div, $attributes);
 		$main_end = BuildHTML::end_element(self::$div);
 		echo $main_start;
-		//NB: we'll need to add a plugin handler for content types etc - eg: for images, texts etc...
 		echo self::$content;
 		echo $main_end;
 	}

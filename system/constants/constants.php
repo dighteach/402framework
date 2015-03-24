@@ -26,11 +26,18 @@ define("HTML_SIDEBAR_CLASS", "grid_2 sidebar_left");
 define("HTML_FOOTER", "footer");
 define("HTML_FOOTER_CLASS", "footer");
 
+//default viewer constants
+define("GALLERY_IMG", "gallery_img");
+define("GALLERY_LINK", "gallery_link");
+define("BOOK_LINK", "book_link");
+
 //default design css and js constants
 define("FRAME_CSS", "frame.css");
 define("GRID_CSS", "grid.css");
+define("JQUERY_UI_CSS", "jquery-ui.css");
 define("FRAME_JS", "frame.js");
 define("JQUERY_JS", "jquery.js");
+define("JQUERY_UI_JS", "jquery-ui.js");
 
 //template css and js files per user theme
 define("THEME_CSS", "theme.css");
@@ -39,5 +46,7 @@ define("THEME_JS", "theme.js");
 //DB constants
 define("DB_PLUGINS", "plugins");
 define("DB_PLUGINS_LOOKUP", "plugins_lookup");
+define("DB_TAXONOMY", "taxonomy");
+define("DB_TAXONOMY_LOOKUP", "taxonomy_lookup");
 
 ?>

@@ -12,6 +12,7 @@ class PluginController extends BuildQuery {
 
 	//plugins
 	private static $db_all_plugins;
+	private static $db_group_plugins;
 	private static $db_plugin_details;
 	
 	/**
@@ -20,6 +21,11 @@ class PluginController extends BuildQuery {
 	function get_plugins($controller, $format) {
 	$this->plugin_query($controller, $format);
 	return self::$db_all_plugins;
+	}
+	
+	function get_group_plugins($group) {
+	$this->group_plugin_query($group);
+	return self::$db_group_plugins;
 	}
 	
 	/**
@@ -40,6 +46,17 @@ class PluginController extends BuildQuery {
 	//build query and return results
 	$db_results = BuildQuery::all_field_query($tables, $columns, $where, $fields);
 	self::$db_all_plugins = $db_results;
+	}
+	
+	function group_plugin_query($group) {
+	$tables = DB_PLUGINS.', '.DB_PLUGINS_LOOKUP;
+	//set variable value to retrieve plugin_id
+	$columns = DB_PLUGINS_LOOKUP.'.plugin_id';
+	$where = DB_PLUGINS_LOOKUP.'.plugin_id='.DB_PLUGINS.'.plugin_id AND '.DB_PLUGINS_LOOKUP.'.content_group=?';
+	$field = array($group);
+	//build query and return results
+	$db_results = BuildQuery::all_field_query($tables, $columns, $where, $field);
+	self::$db_group_plugins = $db_results;
 	}
 	
 	//plugin query for specific field id
