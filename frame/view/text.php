@@ -12,6 +12,7 @@ class TextViewer extends BuildHTML {
 
 	//formatted content
 	private static $viewer_content;
+	//html elements
 	private static $div = "div";
 
 	/**
@@ -22,7 +23,7 @@ class TextViewer extends BuildHTML {
 	return self::$viewer_content;
 	}
 	
-	//format the select image content
+	//format the select text content
 	function format_text_view($content, $txt_viewer_attributes, $txt_attributes) {
 	$txt_full_attributes = array_merge($txt_viewer_attributes, $txt_attributes);
 	$txt_start = BuildHTML::start_element(self::$div, $txt_full_attributes);

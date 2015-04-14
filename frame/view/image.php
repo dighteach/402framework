@@ -14,6 +14,7 @@ class ImageViewer extends BuildHTML {
 	private static $viewer_content;
 	//framework images directory
 	private static $img_dir = MEDIA_IMAGES_DIR;
+	//html elements
 	private static $div = "div";
 	private static $img = "img";
 

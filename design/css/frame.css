@@ -57,8 +57,10 @@ color: #333333;
 
 /*header no.6*/
 h6 {
-font-size: 13px;
+margin: 10px 0 0 0;
+font-size: 12px;
 font-weight: normal;
+text-decoration: underline;
 color: #333333;
 }
 
@@ -74,7 +76,7 @@ a:hover {
 text-decoration: underline;
 }
 
-/*image link - removes blue border often rendered in IE*/
+/*image link - removes blue border often rendered in earlier IE*/
 a img {
 border: 0;
 }
@@ -93,6 +95,10 @@ margin: 0;
 
 ul li {
 list-style: square;
+}
+
+.highlight {
+background-color: pink; 
 }
 
 /*generic table styles*/
@@ -121,14 +127,89 @@ font-size: 11px;
 }
 
 td img {
-width: 70%;
+max-width: 150px;
+max-height: 150px;
+padding: 10px;
 }
+
+.image {
+cursor: pointer;
+}
+
+/**
+ * site menus
+ */
+ 
+/*horizontal menu*/
+.horizontal_menu ul{
+list-style-type:none;
+padding:0;
+margin:0;
+}
+
+.horizontal_menu li{
+float:left;
+position:relative;
+z-index:100;
+list-style-type:none;
+}
+
+.horizontal_menu a, .horizontal_menu :visited {
+display:block;
+font-size:11px;
+width:90px;
+padding: 5px;
+color:#096eb6;
+background:#ffffff;
+border: 1px solid #dedede;
+text-decoration:none;
+margin-right:0;
+text-align:center;
+}
+
+.horizontal_menu :hover{
+color:#333333;
+background:#eeeeee;
+text-decoration: none;
+}
+
+.horizontal_menu ul ul {
+visibility:hidden;
+position:absolute;
+width:90px;
+height:0;
+}
+
+.horizontal_menu ul li:hover ul, .horizontal_menu ul a:hover ul{
+visibility:visible;
+}
+
+/*vertical menu*/
+.vertical_menu ul {
+min-width: 100px;
+list-style-type:none;
+padding: 0;
+margin: 5px 0 0 10px;
+}
+
+.vertical_menu li {
+padding: 3px 0 3px 0;
+list-style-type:none;
+}
+
+.vertical_menu ul li ul {
+min-width: 100px;
+}
+
+/**
+ * header section
+ */
 
 /*header within main container*/
 div.header {
 height: 90px;
 width: 100%;
-z-index: 150;
+z-index: 10;
 background-color: #555555;
 position: relative;
 top: 0;
@@ -140,6 +221,10 @@ border-bottom: 1px solid #cccccc;
 padding:20px;
 }
 
+/**
+ * central section
+ */
+
 /*central content*/
 div.centre {
 height:100%;
@@ -149,12 +234,17 @@ height:100%;
 div.node_content {
 height: 100%;
 padding: 5px;
+margin-bottom: 100px;
 }
 
 /*image positioning for central node for content output*/
 div.node_content img {
-width:100%;
+width:95%;
 }
+
+/**
+ * sidebar section
+ */
 
 /*sidebar left*/
 div.sidebar_left {
@@ -187,6 +277,17 @@ border: 1px solid #dedede;
 background-color: #eeeeee;
 }
 
+/*sidebar left related*/
+div.sidebar_left div.related_title {
+font-size: 13px;
+padding: 10px;
+}
+
+
+/**
+ * footer section
+ */
+
 /*page footer*/
 div.footer {
 position:fixed;
@@ -200,8 +301,12 @@ border-top: 1px solid #cccccc;
 padding-top: 20px;
 padding-bottom: 15px;
 text-indent: 15px;
-z-index: 105;
+z-index: 10;
 }
+
+/**
+ * plugins and viewers
+ */
 
 /*plugin options*/
 div.plugin_options {
@@ -224,11 +329,7 @@ div.thumb_contain img {
 width: 150px;
 height: 150px;
 padding: 10px;
-cursor: pointer;
 }
-
-/*book viewer options*/
-
 
 /*group pager options*/
 #paging {
@@ -251,4 +352,30 @@ background-color: #eeeeee;
 ul#paging li.current {
 background-color: #096eb6;
 color: #ffffff;
+}
+
+div.text {
+margin-left: auto;
+margin-right: auto;
+width: 750px;
+}
+
+/*xml styling*/
+.tei_LB {
+display:block;
+}
+
+.tei_centre {
+margin-left: 125px;
+}
+
+.page_num {
+margin-left: 150px;
+}
+
+/*map plugin loader div - where the map is rendered!*/
+#map_canvas { 
+width: 100%;
+height: 800px;
+background-color: #CCC;
 }

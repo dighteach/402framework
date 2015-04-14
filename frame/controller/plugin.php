@@ -13,6 +13,7 @@ class PluginController extends BuildQuery {
 	//plugins
 	private static $db_all_plugins;
 	private static $db_group_plugins;
+	private static $db_controller_plugins;
 	private static $db_plugin_details;
 	
 	/**
@@ -23,9 +24,20 @@ class PluginController extends BuildQuery {
 	return self::$db_all_plugins;
 	}
 	
+	/**
+	 * return the plugins available for the specified group
+	 */
 	function get_group_plugins($group) {
 	$this->group_plugin_query($group);
 	return self::$db_group_plugins;
+	}
+	
+	/**
+	 * return the plugins available for the specified controller
+	 */
+	function get_controller_plugins($controller) {
+	$this->controller_plugin_query($controller);
+	return self::$db_controller_plugins;
 	}
 	
 	/**
@@ -57,6 +69,17 @@ class PluginController extends BuildQuery {
 	//build query and return results
 	$db_results = BuildQuery::all_field_query($tables, $columns, $where, $field);
 	self::$db_group_plugins = $db_results;
+	}
+	
+	function controller_plugin_query($controller) {
+	$tables = DB_PLUGINS.', '.DB_PLUGINS_LOOKUP;
+	//set variable value to retrieve plugin_id
+	$columns = 'DISTINCT('.DB_PLUGINS_LOOKUP.'.plugin_id)';
+	$where = DB_PLUGINS_LOOKUP.'.plugin_id='.DB_PLUGINS.'.plugin_id AND '.DB_PLUGINS_LOOKUP.'.plugin_type=?';
+	$field = array($controller);
+	//build query and return results
+	$db_results = BuildQuery::all_field_query($tables, $columns, $where, $field);
+	self::$db_controller_plugins = $db_results;
 	}
 	
 	//plugin query for specific field id

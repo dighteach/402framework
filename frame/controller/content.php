@@ -18,6 +18,12 @@ class ContentController extends BuildQuery {
 	private static $db_content_group;
 	//content type id
 	private static $db_content_type;
+	//controller content
+	private static $db_controller_content;
+	//content taxa
+	private static $db_content_taxa;
+	//content formats
+	private static $db_content_formats;
 	
 	/**
 	 * return the DB content field - eg: contenttext, contentimage
@@ -51,6 +57,22 @@ class ContentController extends BuildQuery {
 	return self::$db_content_type;
 	}
 	
+	/**
+	 * return the DB content for controller and param
+	 */
+	 function get_controller_content($controller, $params) {
+	 $this->content_row_query($controller, $params);
+	 return self::$db_content_row;
+	 }
+	 
+	 /**
+	 * get all content formats for specified content id
+	 */
+	 function get_content_formats($controller, $format, $params) {
+	 $this->content_format_query($controller, $format, $params);
+	 return self::$db_content_formats;
+	 }
+	
 	//content query for specified DB field - $format specifies required field eg: contenttext, contentimage, contentdesc...
 	private function content_field_query($controller, $format, $params) {
 	if (isset($params['id'])) {
@@ -65,12 +87,30 @@ class ContentController extends BuildQuery {
 	}
 	}
 	
+	//content query for available formats - constants for content formats
+	private function content_format_query($controller, $format, $params) {
+	$formats = array();
+	if (isset($format) && isset($params['id'])) {
+	$this->content_row_query($controller, $params);
+	//check against known content($format) columns
+	if(!empty(self::$db_content_row[DB_CONTENT_IMAGE])) {
+	self::$db_content_formats[$controller.'/image'] = $params['id'];
+	}
+	if(!empty(self::$db_content_row[DB_CONTENT_TEXT])) {
+	self::$db_content_formats[$controller.'/text'] = $params['id'];
+	}
+	if(!empty(self::$db_content_row[DB_CONTENT_MAP])) {
+	self::$db_content_formats[$controller.'/map'] = $params['id'];
+	}
+	}
+	}
+	
 	//content query for specified DB group
 	private function content_group_query($controller, $format, $group, $params) {
 	if (isset($params['id'])) {
 	$tables = $controller.', '.$controller.'_lookup, '.$controller.'_group, '.$controller.'_type';
 	$columns = $controller.'.*';
-	$where = 'content_lookup.content_id=content.contentid AND content_lookup.content_type_id=content_type.content_type_id AND content_lookup.content_group_id=content_group.content_group_id AND content_type.content_type_name=? AND content_group.content_group_name=? AND content_lookup.taxa_id=?';
+	$where = DB_CONTENT_LOOKUP.'.content_id='.DB_CONTENT.'.contentid AND '.DB_CONTENT_LOOKUP.'.content_type_id='.DB_CONTENT_TYPE.'.content_type_id AND '.DB_CONTENT_LOOKUP.'.content_group_id='.DB_CONTENT_GROUP.'.content_group_id AND '.DB_CONTENT_TYPE.'.content_type_name=? AND '.DB_CONTENT_GROUP.'.content_group_name=? AND '.DB_CONTENT_LOOKUP.'.taxa_id=? ORDER BY '.DB_CONTENT.'.contentid';
 	$fields = array($format, $group, $params['id']);
 	//build single query from BuildQuery class
 	$db_results = BuildQuery::all_field_query($tables, $columns, $where, $fields);

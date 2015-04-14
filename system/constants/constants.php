@@ -30,6 +30,9 @@ define("HTML_FOOTER_CLASS", "footer");
 define("GALLERY_IMG", "gallery_img");
 define("GALLERY_LINK", "gallery_link");
 define("BOOK_LINK", "book_link");
+define("TAXA_LINK", "taxa_link");
+define("SEARCH_LINK", "search_link");
+define("MAP_LINK", "map_link");
 
 //default design css and js constants
 define("FRAME_CSS", "frame.css");
@@ -43,10 +46,37 @@ define("JQUERY_UI_JS", "jquery-ui.js");
 define("THEME_CSS", "theme.css");
 define("THEME_JS", "theme.js");
 
-//DB constants
+//DB content constants
+define("DB_CONTENT", "content");
+define("DB_CONTENT_LOOKUP", "content_lookup");
+define("DB_CONTENT_TYPE", "content_type");
+define("DB_CONTENT_GROUP", "content_group");
+define("DB_CONTENT_IMAGE", "contentimage");
+define("DB_CONTENT_TEXT", "contenttext");
+define("DB_CONTENT_MAP", "contentmap");
+
+//DB plugin constants
 define("DB_PLUGINS", "plugins");
 define("DB_PLUGINS_LOOKUP", "plugins_lookup");
+
+//DB taxonomy constants
 define("DB_TAXONOMY", "taxonomy");
 define("DB_TAXONOMY_LOOKUP", "taxonomy_lookup");
+
+//DB menu constants
+define("DB_MENU", "menu");
+define("DB_MENU_LOOKUP", "menu_lookup");
+define("DB_NODE", "node");
+define("DB_MAIN_MENU", "1");
+define("DB_CONTENT_MENU", "2");
+
+//DB content type id constants - based on URI format
+define("DB_CONTENT_TYPE_TEXT", "1");
+define("DB_CONTENT_TYPE_IMAGE", "2");
+define("DB_CONTENT_TYPE_AUDIO", "3");
+define("DB_CONTENT_TYPE_VIDEO", "4");
+define("DB_CONTENT_TYPE_BIBLIOGRAPHY", "5");
+define("DB_CONTENT_TYPE_TEI", "6");
+define("DB_CONTENT_TYPE_MAP", "7");
 
 ?>

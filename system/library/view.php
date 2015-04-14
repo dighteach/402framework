@@ -16,6 +16,10 @@ class View extends BuildHTML {
 	private static $div = "div";
 	private static $span = "span";
 	private static $img = "img";
+	private static $ul = "ul";
+	private static $li = "li";
+	private static $form = "form";
+	private static $input = "input";
 	private static $css_type = "text/css";
 	private static $css_media = "screen";
 	private static $js_type = "text/javascript";
@@ -63,6 +67,26 @@ class View extends BuildHTML {
 	}
 	}
 	
+	//draw basic search form
+	function draw_search_form() {
+	//html search form with get method
+	$form_attributes = array("class"=>"search_form","name"=>"search", "method"=>"get");
+	$form_start = BuildHTML::start_element(self::$form, $form_attributes);
+	$form_end = BuildHTML::end_element(self::$form);
+	echo $form_start;
+	//input fields for search form
+	$input_attributes1 = array("type"=>"hidden","name"=>"node","value"=>"search");
+	//id 'tags' added for JQuery UI autocomplete functionality
+	$input_attributes2 = array("id"=>"tags","type"=>"text","name"=>"query");
+	$input_attributes3 = array("type"=>"submit","value"=>"search");
+	$input1 = BuildHTML::start_element(self::$input, $input_attributes1);
+	$input2 = BuildHTML::start_element(self::$input, $input_attributes2);
+	$input3 = BuildHTML::start_element(self::$input, $input_attributes3);
+	//output all input elements
+	echo $input1.$input2.$input3;
+	echo $form_end;
+	}
+	
 	//draw required options etc for specified plugins
 	function draw_plugins($plugins) {
 	if (!empty($plugins)) {
@@ -101,6 +125,94 @@ class View extends BuildHTML {
 	}
 	}
 	
+	//draw menu links and structure
+	function draw_menu($menu_links, $menu_class) {
+	$menu_attributes = array("class"=>'grid_6 '.$menu_class);
+	$menu_start = BuildHTML::start_element(self::$div, $menu_attributes);
+	$menu_end = BuildHTML::end_element(self::$div);
+	$ul_start = BuildHTML::start_element(self::$ul);
+	$ul_end = BuildHTML::end_element(self::$ul);
+	$li_start = BuildHTML::start_element(self::$li);
+	$li_end = BuildHTML::end_element(self::$li);
+	echo $menu_start;
+	echo $ul_start;
+	if ($menu_class == 'vertical_menu') {
+	echo $li_start.'Menu'.$li_end;
+	}
+	if (is_array($menu_links)) {
+	foreach ($menu_links as $key=>$val) {
+	$parent_id = $val['node_id'];
+	$parent_name = $val['node_name'];
+	$parent_desc = $val['node_desc'];
+	$parent_link = $val['node_link'];
+	//can be abstracted using BuildHTML start element
+	echo '<li id="'.$parent_id.'"><a href="?node='.$parent_link.'" title="'.$parent_desc.'">'.$parent_name.'</a>';
+	if (is_array($val)) {
+	echo $ul_start;
+	foreach ($val as $key2=>$val2) {
+	if (is_array($val2)) {
+	$child_id = $val2['node_id'];
+	$child_name = $val2['node_name'];
+	$child_desc = $val2['node_desc'];
+	$child_link = $val2['node_link'];
+	//can be abstracted using BuildHTML start element
+	echo '<li id="'.$child_id.'"><a href="?node='.$child_link.'" title="'.$child_desc.'">'.$child_name.'</a>'.$li_end;
+	}
+	}
+	echo $ul_end.$li_end;
+	}
+	else {
+	echo $li_end;
+	}
+	}
+	}
+	echo $ul_end;
+	echo $menu_end;
+	}
+	
+	//draw related links for taxa
+	function draw_related_links($related_links) {
+	if (is_array($related_links)) {
+	$related_attributes = array("class"=>'related_links grid_12 vertical_menu');
+	$related_start = BuildHTML::start_element(self::$div, $related_attributes);
+	$related_end = BuildHTML::end_element(self::$div);
+	$ul_start = BuildHTML::start_element(self::$ul);
+	$ul_end = BuildHTML::end_element(self::$ul);
+	$li_start = BuildHTML::start_element(self::$li);
+	$li_end = BuildHTML::end_element(self::$li);
+	echo $related_start;
+	echo $ul_start;
+	echo $li_start.'Related Taxa'.$li_end;
+	foreach ($related_links as $key=>$val) {
+	$related_id = $val['taxa_id'];
+	$related_name = ucfirst($val['taxa_name']);
+	$related_desc = $val['taxa_description'];
+	echo $li_start.'<a href="?node=taxonomy&id='.$related_id.'" title="'.$related_desc.'">'.$related_name.'</a>'.$li_end;
+	}
+	echo $ul_end.$related_end;
+	}
+	}
+	
+	//draw related links for taxa
+	function draw_related_content($related_content) {
+	if (is_array($related_content)) {
+	$related_attributes = array("class"=>'related_content grid_12 vertical_menu');
+	$related_start = BuildHTML::start_element(self::$div, $related_attributes);
+	$related_end = BuildHTML::end_element(self::$div);
+	$ul_start = BuildHTML::start_element(self::$ul);
+	$ul_end = BuildHTML::end_element(self::$ul);
+	$li_start = BuildHTML::start_element(self::$li);
+	$li_end = BuildHTML::end_element(self::$li);
+	echo $related_start;
+	echo $ul_start;
+	echo $li_start.'Related Content'.$li_end;
+	foreach ($related_content as $key=>$val) {
+	echo $li_start.'<a href="?node='.$key.'&id='.$val.'" title="View related page for '.$key.'">'.$key.'</a>'.$li_end;
+	}
+	echo $ul_end.$related_end;
+	}
+	}
+	
 	//draw css & js for user selected theme 
 	function draw_theme() {
 		//add basic user specified theme css
@@ -117,7 +229,6 @@ class View extends BuildHTML {
 		$head_end = BuildHTML::end_element(HTML_HEAD);	
 		//output html head element
 		echo $head_start;
-		
 		//add project title and other metadata
 		global $settings;
 		$title = $settings['project_title'];
@@ -136,13 +247,16 @@ class View extends BuildHTML {
 		$meta_desc = BuildHTML::start_element(HTML_META, $desc_attributes);
 		$meta_charset = BuildHTML::start_element(HTML_META, $charset_attributes);
 		echo $meta_keywords.$meta_desc.$meta_charset;
-		
 		//add default css to html head
 		if (is_array($css)) {
 		foreach ($css as $val) {
 		self::draw_css(CSS_DIR, $val, self::$css_type, self::$css_media);
 		}
 		}
+		//add script for google maps api
+		$gmap_url = "https://maps.googleapis.com/maps/api/js";
+		$gmap_val = "?sensor=false";
+		self::draw_js($gmap_url, $gmap_val, self::$js_type);
 		//add default js to html head
 		if (is_array($js)) {
 		foreach ($js as $val) {
@@ -166,26 +280,29 @@ class View extends BuildHTML {
 	}
 	
 	//draw html header element with attributes
-	function draw_header() {
+	function draw_header($main_menu) {
 		global $settings;
 		$logo = $settings['project_logo'];
+		$menu_class = "horizontal_menu";
 		$attributes = array("id"=>HTML_HEADER,"class"=>HTML_HEADER_CLASS);
 		$logo_attributes = array("src"=>DESIGN_IMAGES_DIR.$logo, "alt"=>"framework default logo", "title"=>"402 framework", "class"=>"logo");
 		$header_start = BuildHTML::start_element(self::$div, $attributes);
 		$header_end = BuildHTML::end_element(self::$div);
 		$logo_start = BuildHTML::start_element(self::$img, $logo_attributes);
 		echo $header_start;
-		echo $logo_start;
+		echo '<div id="header_logo" class="grid_3">'.$logo_start.'</div>';
+		self::draw_menu($main_menu, $menu_class);
+		self::draw_search_form();
 		echo $header_end;
 	}
 	
 	//draw html elements for defined middle of framework template - centre, main, and sidebar
-	function draw_middle($content, $content_meta, $plugins) {
+	function draw_middle($content, $content_meta, $plugins, $content_menu, $related_links, $related_content) {
 		$attributes = array("id"=>HTML_CENTRE,"class"=>HTML_CENTRE_CLASS);
 		$centre_start = BuildHTML::start_element(self::$div, $attributes);
 		$centre_end = BuildHTML::end_element(self::$div);
 		echo $centre_start;
-		self::draw_sidebar($content_meta);
+		self::draw_sidebar($content_meta, $content_menu, $related_links, $related_content);
 		if ($plugins != null) {
 		self::draw_plugins($plugins);
 		}
@@ -206,22 +323,28 @@ class View extends BuildHTML {
 	}
 	
 	//draw html sidebar element with attributes
-	function draw_sidebar($content_meta) {
+	function draw_sidebar($content_meta, $content_menu, $related_links, $related_content) {
+		$menu_class = "vertical_menu";
 		$attributes = array("id"=>HTML_SIDEBAR,"class"=>HTML_SIDEBAR_CLASS);
 		$sidebar_start = BuildHTML::start_element(self::$div, $attributes);
 		$sidebar_end = BuildHTML::end_element(self::$div);
+		echo $sidebar_start;
 		if (!empty($content_meta)) {
 		//remove content title and description from content metadata
 		$sidebar_meta = array_slice($content_meta, 2);
-		echo $sidebar_start;
 		self::draw_titles($content_meta);
 		self::draw_meta($sidebar_meta);
-		echo $sidebar_end;
+		//draw related content
+		if (!empty($related_content)) {
+		self::draw_related_content($related_content);
 		}
-		else {
-		echo $sidebar_start;
-		echo $sidebar_end;
+		//draw related links
+		if (!empty($related_links)) {
+		self::draw_related_links($related_links);
 		}
+		self::draw_menu($content_menu, $menu_class);
+		}
+		echo $sidebar_end;
 	}
 	
 	//draw content title and content description from content_meta

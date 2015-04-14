@@ -14,6 +14,7 @@ class BookViewer extends BuildHTML {
 	private static $viewer_content;
 	private static $book_content;
 	private static $book_headers;
+	//html elements
 	private static $div = "div";
 	private static $img = "img";
 	private static $link = "a";

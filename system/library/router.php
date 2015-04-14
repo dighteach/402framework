@@ -114,7 +114,12 @@ private function init() {
 	$param_chunks = explode("=", $val);
 	$params[$param_chunks[0]] = $param_chunks[1];
 	}
+	if (isset($params)) {
 	self::$params = $params;
+	}
+	else {
+	self::$params = null;
+	}
 	}	 
 }
 

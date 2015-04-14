@@ -9,16 +9,16 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() { 
-  $('div.thumb_contain img').click(function() {
+  $('.image img').click(function() {
   var img_src = $(this).attr('src');
   var img_url = '<img src="'+img_src+'">';
   $('div#gallery_popup').html(img_url);
-  $('div#gallery_popup img').css({'width' : '100%' });
+  $('div#gallery_popup img').css({'width' : '100%'});
   
   $( "div#gallery_popup" ).dialog({
-      height: 800,
-      width: 1050,
-      modal: true
+      width: 'auto',
+      modal: true,
+      title: "Drag and resize window as required"
     });
   
   });

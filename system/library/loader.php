@@ -88,6 +88,18 @@ function load_controller($controller = null, $controller_dir = null, $format = n
 	//trigger debug error - for testing at the moment...
 	return trigger_error("Debug: Taxonomy Class not found</b>");
 	}
+	}
+	//else handle default home route request
+	else {
+	View::selected_theme();
+	//temporary handler for home page...
+	$content = "<h3>Welcome to the 402 framework</h3>";
+	self::$content_meta = null;
+	self::$plugins = null;
+	$related_links = null;
+	$related_content = null;
+	self::draw_theme($content, self::$content_meta, self::$plugins, $related_links, $related_content);
+	}
   	
   	//check content format, group, and params for controller - group content returned eg: image gallery
   	if ($controller !=null && $format != null && $group != null && $params != null) {
@@ -129,7 +141,7 @@ function load_controller($controller = null, $controller_dir = null, $format = n
 	return trigger_error("Debug: Viewer Class not found - <b>".$group."</b>");
 	}
 	
-	//check available plugins for format
+	//check available plugins
  	$plugin_controller = CONTROLLER_DIR.'plugin'.FRAME_EXTENSION;
  	//load required plugin file
  	require_once $plugin_controller;
@@ -147,8 +159,11 @@ function load_controller($controller = null, $controller_dir = null, $format = n
 	//trigger debug error - for testing at the moment...
 	return trigger_error("Debug: Plugin Class not found - <b>".$controller.', '.$format."</b>");
 	}
+	//get related links for taxa id
+	$related_links = $taxonomy_object->get_taxonomy_related($params);
+	$related_content = null;
 	//draw theme for plugin, metadata, and content
-	self::draw_theme($group_content, self::$content_meta, self::$plugins);
+	self::draw_theme($group_content, self::$content_meta, self::$plugins, $related_links, $related_content);
 	}
 	else {
 	//get chosen theme
@@ -156,7 +171,9 @@ function load_controller($controller = null, $controller_dir = null, $format = n
 	$content = 'No content found.';
 	self::$content_meta = null;
 	self::$plugins = null;
-	self::draw_theme($content, self::$content_meta, self::$plugins);
+	$related_links = null;
+	$related_content = null;
+	self::draw_theme($content, self::$content_meta, self::$plugins, $related_links, $related_content);
 	}
   	}
 	//check content format and params for controller - single content returned eg: image, text...
@@ -196,6 +213,10 @@ function load_controller($controller = null, $controller_dir = null, $format = n
 	$viewer_attributes = array("id"=>$params["id"],"class"=>$format);
 	//format attributes array for the $format itself - eg: title, desc
 	$format_attributes = array("title"=>$content_title.' - '.$content_desc,"desc"=>$content_desc);
+	//check and get other content for content id
+	$related_content = $controller_object->get_content_formats($controller, $format, $params);
+	//check related_content array for current controller and format - then unset/remove
+	unset($related_content[$controller.'/'.$format]);
 	//get formatted content with required viewer plugin (image/text etc)
 	$viewer_content = $viewer_object->get_viewer_content($content, $viewer_attributes, $format_attributes);
 	}
@@ -204,7 +225,7 @@ function load_controller($controller = null, $controller_dir = null, $format = n
 	return trigger_error("Debug: Viewer Class not found - <b>".$format."</b>");
 	}
  	
- 	//check available plugins for format
+ 	//check available plugins
  	$plugin_controller = CONTROLLER_DIR.'plugin'.FRAME_EXTENSION;
  	//load required plugin file
  	require_once $plugin_controller;
@@ -222,8 +243,14 @@ function load_controller($controller = null, $controller_dir = null, $format = n
 	//trigger debug error - for testing at the moment...
 	return trigger_error("Debug: Plugin Class not found - <b>".$controller.', '.$format."</b>");
 	}
+	//add format id to params
+	$format_constant = 'DB_CONTENT_TYPE_'.strtoupper($format);
+	//use constant() to get constant from string stored in $format_constant variable
+	$params['format'] = constant($format_constant);
+	//get related links for content id
+	$related_links = $taxonomy_object->get_content_related($params);
 	//draw theme for plugin, metadata, and content
-	self::draw_theme($viewer_content, self::$content_meta, self::$plugins);
+	self::draw_theme($viewer_content, self::$content_meta, self::$plugins, $related_links, $related_content);
 	}
 	else {
 	//get chosen theme
@@ -231,18 +258,124 @@ function load_controller($controller = null, $controller_dir = null, $format = n
 	$content = 'No content found.';
 	self::$content_meta = null;
 	self::$plugins = null;
-	self::draw_theme($content, self::$content_meta, self::$plugins);
+	$related_links = null;
+	$related_content = null;
+	self::draw_theme($content, self::$content_meta, self::$plugins, $related_links, $related_content);
 	}
 	}
+	//check content etc params for controller - all content, taxa etc based on single params id eg: content&id, taxonomy&id...
+	else if ($controller != null && $params != null) {
+	$controller_content = $controller_object->get_controller_content($controller, $params);
+	//check for associated metadata where id is not set as taxa - eg: contentid, user id etc...
+	if ($controller == "content") {
+	$meta_results = $controller_object->get_content_row($controller, $params);
+	$meta_title = $meta_results['contentname'];
+	$meta_desc = $meta_results['contentdesc'];
 	}
-	//else handle default home route request
-	else {
+	//else check for taxonomy...
+	else if ($controller == "taxonomy") {
+	//get taxonomy title and description for metadata
+	$meta_results = $taxonomy_object->get_taxonomy_row($params);
+	$meta_title = $meta_results['taxa_name'];
+	$meta_desc = $meta_results['taxa_description'];
+	//get related links for taxa id
+	$related_links = $taxonomy_object->get_taxonomy_related($params);
+	}
+	else if ($controller == "map") {
+	$meta_results = $controller_object->get_content_row($controller, $params);
+	$meta_title = $meta_results['contentname'];
+	$meta_desc = $meta_results['contentdesc'];
+	}
+	else if ($controller == "search") {
+	$meta_title = "Search Results";
+	$meta_desc = "Returned results for the query - ".$params['query'];
+	$related_links = null;
+	}
+	//add title and description meta to content meta array
+	self::$content_meta['title'] = $meta_title;
+	self::$content_meta['description'] = $meta_desc;
+	
+	//build and draw view for framework with theme (if applicable)
+	if (!empty($controller_content)) { 
+	//get chosen theme
 	View::selected_theme();
-	//temporary handler for home page...
-	$content = "<h3>Welcome to the 402 framework</h3>";
+	
+	//get default controller content view for user select route - eg: content&id=6, taxonomy&id=3...
+	$controller_content_view = VIEW_DIR.$controller.FRAME_EXTENSION;
+	//load required view
+	require_once $controller_content_view;
+	
+	//define class name for required group viewer
+	$controller_content_class = ucfirst($controller).VIEWER_CLASS_NAME;
+
+	//check controller content class exists and instantiate object
+	if (class_exists($controller_content_class)) {
+	$controller_content_object = new $controller_content_class();
+	if (isset($params['query'])) {
+	//controller attributes array for use with controller content html output
+	$controller_content_attributes = array("id"=>$params["query"],"class"=>$controller.'_all');
+	}
+	else {
+	//controller attributes array for use with controller content html output
+	$controller_content_attributes = array("id"=>$params["id"],"class"=>$controller.'_all');
+	}
+	//taxonomy attributes array eg: title, desc
+	$meta_attributes = array("title"=>$meta_title,"desc"=>$meta_desc);
+	//get formatted content with required viewer plugin (content/taxonomy etc)
+	$controller_content2 = $controller_content_object->get_controller_content($controller_content, $controller_content_attributes, $meta_attributes);
+	}
+	else {
+	//trigger debug error - for testing at the moment...
+	return trigger_error("Debug: Viewer Class not found - <b>".$group."</b>");
+	}
+	
+	//check available plugins
+ 	$plugin_controller = CONTROLLER_DIR.'plugin'.FRAME_EXTENSION;
+ 	//load required plugin file
+ 	require_once $plugin_controller;
+ 	
+ 	//define controller plugin class
+ 	$plugin_class = 'Plugin'.CONTROLLER_CLASS_NAME;
+ 	
+ 	//check plugin class and instantiate object
+ 	if (class_exists($plugin_class)) {
+	$plugin_object = new $plugin_class();
+	$plugin_check = $plugin_object->get_controller_plugins($controller);
+	self::load_plugins($plugin_check);
+	}
+	else {
+	//trigger debug error - for testing at the moment...
+	return trigger_error("Debug: Plugin Class not found - <b>".$controller."</b>");
+	}
+	//get related links for taxa id
+	$related_links = $taxonomy_object->get_content_related($params);
+	$related_content = null;
+	//draw theme for plugin, metadata, and content
+	self::draw_theme($controller_content2, self::$content_meta, self::$plugins, $related_links, $related_content);
+	}
+	else {
+	//get chosen theme
+	View::selected_theme();
+	$content = 'No content found.';
 	self::$content_meta = null;
 	self::$plugins = null;
-	self::draw_theme($content, self::$content_meta, self::$plugins);
+	$related_links = null;
+	$related_content = null;
+	self::draw_theme($content, self::$content_meta, self::$plugins, $related_links, $related_content);
+	}
+	
+	
+	}
+	//return empty result for single controller URI request - eg; content, taxonomy etc - can be handled with controller and viewer to show all output per controller...
+	else if ($controller != null ) {
+	//get chosen theme
+	View::selected_theme();
+	$content = '<p>Please view <a href="?node=content/text&id=6">Site Content</a> for further details</p>';
+	self::$content_meta = null;
+	self::$plugins = null;
+	$related_links = null;
+	$related_content = null;
+	self::draw_theme($content, self::$content_meta, self::$plugins, $related_links, $related_content);
 	}
 
 }
@@ -300,6 +433,35 @@ function load_plugins($plugin_check) {
 }
 
 /**
+ * load the main site menu - rendered in the header section of the framework template
+ */
+function load_menu($menu_id) {
+	$menu = array();
+
+	$menu_file = CONTROLLER_DIR."menu".FRAME_EXTENSION;
+	//load the menu class
+	require_once $menu_file;
+	
+	//define class name for required controller
+ 	$menu_class = 'Menu'.CONTROLLER_CLASS_NAME;
+ 
+ 	//check class exists and instantiate object
+ 	if (class_exists($menu_class)) {
+ 	$menu_object = new $menu_class();
+ 	}
+ 	else {
+ 	//trigger debug error - for testing at the moment...
+ 	return trigger_error("Debug: Menu Class not found");
+ 	}
+
+ 	$menu = $menu_object->get_menu($menu_id);
+ 	if (!empty($menu)) {
+ 	return $menu;
+ 	}
+		
+}
+
+/**
  * load the chosen viewer theme for the framework
  */
 function init_theme($theme) {
@@ -321,15 +483,18 @@ function init_theme($theme) {
 /**
  *draw the chosen viewer theme and output content for the framework
  */
-function draw_theme($content, $content_meta, $plugins) {
+function draw_theme($content, $content_meta, $plugins, $related_links, $related_content) {
 	//set required default css and js files for framework
 	$css = array(FRAME_CSS, GRID_CSS, JQUERY_UI_CSS);
 	$js = array(JQUERY_JS, JQUERY_UI_JS, FRAME_JS);
+	//load main site menu
+	$main_menu = self::load_menu(DB_MAIN_MENU);
+	$content_menu = self::load_menu(DB_CONTENT_MENU);
 	//draw the template and theme
 	View::draw_head($css, $js);
 	View::draw_top();
-	View::draw_header();
-	View::draw_middle($content, $content_meta, $plugins);
+	View::draw_header($main_menu);
+	View::draw_middle($content, $content_meta, $plugins, $content_menu, $related_links, $related_content);
 	View::draw_footer();
 	View::draw_bottom();
 }

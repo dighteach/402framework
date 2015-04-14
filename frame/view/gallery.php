@@ -13,6 +13,7 @@ class GalleryViewer extends BuildHTML {
 	//formatted content
 	private static $viewer_content;
 	private static $gallery_content;
+	//html elements
 	private static $div = "div";
 	private static $img = "img";
 	private static $link = "a";
@@ -42,7 +43,7 @@ class GalleryViewer extends BuildHTML {
 	$img_name = $val['contentname'];
 	$img_desc = $val['contentdesc'];
 	$img = $val['contentimage'];
-	$thumb_attributes = array("class"=>"grid_3 thumb_contain group_item");
+	$thumb_attributes = array("class"=>"grid_3 image thumb_contain group_item");
 	$img_attributes = array("id"=>$img_id,"class"=>GALLERY_IMG,"title"=>$img_name.' - '.$img_desc,"alt"=>$img_name,"src"=>MEDIA_IMAGES_DIR.$img);
 	$link_attributes = array("href"=>'?node=content/image&id='.$img_id,"class"=>GALLERY_LINK,"title"=>"click to open image page");
 	$thumb_start = BuildHTML::start_element(self::$div, $thumb_attributes);

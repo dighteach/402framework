@@ -10,7 +10,7 @@ class BuildHTML {
 	
 	protected static $attributes = array();
 	
-	//build empty element container allowing ajax insertion for any subsequent content
+	//build empty full element container allowing ajax insertion for any subsequent content
 	protected function build_element($id, $class) {
 	
 	}
